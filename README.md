@@ -1,8 +1,5 @@
 # HTML Machine Test — Sign In Page
 
-A beautiful demo **Sign In** page built with pure HTML, CSS, and JavaScript. Includes full **Docker** support and **GitHub Actions CI/CD** pipeline.
-
----
 
 ## 📁 Project Structure
 

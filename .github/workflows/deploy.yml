@@ -1,0 +1,51 @@
+name: CI/CD — Build & Deploy Docker Image
+
+# ── Trigger: runs when a PR is merged into main ───────────────────────────────
+on:
+  push:
+    branches:
+      - main          # fires automatically after PR is merged to main
+
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+  build-and-push:
+    name: 🐳 Build & Push to Docker Hub
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout source code
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Log in to Docker Hub using GitHub Secrets
+      - name: 🔑 Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Build the Docker image and tag it
+      - name: 🔨 Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest \
+                     ${{ secrets.DOCKER_USERNAME }}/html-signin-app:${{ github.sha }}
+
+      # 4. Push both tags to Docker Hub
+      - name: 🚀 Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/html-signin-app:${{ github.sha }}
+
+      # 5. Print success summary
+      - name: ✅ Deployment summary
+        run: |
+          echo "==========================================="
+          echo "  Image pushed successfully!"
+          echo "  Tag: latest"
+          echo "  Tag: ${{ github.sha }}"
+          echo "  Repo: ${{ secrets.DOCKER_USERNAME }}/html-signin-app"
+          echo "==========================================="
+          echo "To run locally:"
+          echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest"
+          echo "  docker run -d -p 8080:80 ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest"

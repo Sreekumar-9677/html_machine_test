@@ -1,51 +1,81 @@
-name: CI/CD — Build & Deploy Docker Image
+name: Deploy to EC2
 
-# ── Trigger: runs when a PR is merged into main ───────────────────────────────
+# STEP 1: WHEN does this run?
+# - When someone pushes code to main branch
+# - When someone creates a PR from staging to main
 on:
   push:
     branches:
-      - main          # fires automatically after PR is merged to main
+      - main
+  pull_request:
+    branches:
+      - main
 
-# ─────────────────────────────────────────────────────────────────────────────
 jobs:
-  build-and-push:
-    name: 🐳 Build & Push to Docker Hub
+
+  # ─────────────────────────────────────
+  # JOB 1 - Build Docker Image and Push
+  # ─────────────────────────────────────
+  build:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout source code
-      - name: ⬇️ Checkout code
+
+      # STEP 1: Download the code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Log in to Docker Hub using GitHub Secrets
-      - name: 🔑 Log in to Docker Hub
+      # STEP 2: Login to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Build the Docker image and tag it
-      - name: 🔨 Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest .
-          docker tag ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest \
-                     ${{ secrets.DOCKER_USERNAME }}/html-signin-app:${{ github.sha }}
+      # STEP 3: Build the Docker image
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest .
 
-      # 4. Push both tags to Docker Hub
-      - name: 🚀 Push Docker image to Docker Hub
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/html-signin-app:${{ github.sha }}
+      # STEP 4: Push image to Docker Hub
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest
 
-      # 5. Print success summary
-      - name: ✅ Deployment summary
-        run: |
-          echo "==========================================="
-          echo "  Image pushed successfully!"
-          echo "  Tag: latest"
-          echo "  Tag: ${{ github.sha }}"
-          echo "  Repo: ${{ secrets.DOCKER_USERNAME }}/html-signin-app"
-          echo "==========================================="
-          echo "To run locally:"
-          echo "  docker pull ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest"
-          echo "  docker run -d -p 8080:80 ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest"
+
+  # ─────────────────────────────────────
+  # JOB 2 - Deploy to EC2 Server
+  # (Only runs when code is merged to main, NOT on PR)
+  # ─────────────────────────────────────
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build
+
+    # Only deploy on actual merge to main (skip on PR)
+    if: github.event_name == 'push'
+
+    steps:
+
+      # STEP 5: SSH into EC2 and run Docker container
+      - name: SSH into EC2 and Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Pull the latest image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest
+
+            # Stop old container if running
+            docker stop html-signin-app || true
+            docker rm   html-signin-app || true
+
+            # Start new container on port 80
+            docker run -d \
+              --name html-signin-app \
+              --restart always \
+              -p 80:80 \
+              ${{ secrets.DOCKER_USERNAME }}/html-signin-app:latest
+
+            echo "Done! App is live at http://${{ secrets.EC2_HOST }}"

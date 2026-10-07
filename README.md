@@ -1,4 +1,4 @@
-# HTML Machine Test â€” Sign In Page
+# HTML Machine Test
 
 A simple sign-in page built with HTML, CSS and JavaScript. Containerized with Docker and deployed to AWS EC2 using GitHub Actions CI/CD pipeline.
 
@@ -6,7 +6,7 @@ A simple sign-in page built with HTML, CSS and JavaScript. Containerized with Do
 
 ## Tech Stack
 
-- HTML, CSS, JavaScript
+
 - Docker + Nginx
 - GitHub Actions (CI/CD)
 - AWS EC2
@@ -17,15 +17,11 @@ A simple sign-in page built with HTML, CSS and JavaScript. Containerized with Do
 
 ```
 html_machine_test/
-â”œâ”€â”€ index.html
-â”œâ”€â”€ Dockerfile
-â”œâ”€â”€ .github/
-â”‚   â””â”€â”€ workflows/
-â”‚       â””â”€â”€ deploy.yml
-â””â”€â”€ README.md
-```
-
----
+ index.html
+ Dockerfile
+ .github/
+workflows/
+ deploy.yml
 
 ## Getting Started
 
@@ -46,7 +42,7 @@ docker build -t html-signin-app .
 docker run -d -p 8080:80 html-signin-app
 ```
 
-Open browser â†’ `http://localhost:8080`
+Open browser`http://localhost:8080`
 
 ---
 
@@ -96,9 +92,7 @@ Pull latest image â†’ Run container on port 80
 
 ---
 
-## GitHub Secrets Setup
 
-Go to â†’ **Settings â†’ Secrets â†’ Actions** and add:
 
 | Secret | Description |
 |---|---|
@@ -115,7 +109,7 @@ Go to â†’ **Settings â†’ Secrets â†’ Actions** and add:
 SSH into your EC2 instance and install Docker:
 
 ```bash
-ssh -i your-key.pem ubuntu@YOUR_EC2_IP
+ssh -i your-key.pem ubuntu@EC2_IP
 
 sudo apt update && sudo apt install -y docker.io
 sudo systemctl start docker
@@ -140,9 +134,3 @@ docker run -d \
   -p 80:80 \
   yourdockerhubuser/html-signin-app:latest
 ```
-
----
-
-## Author
-
-**Sreekumar J M** â€” Frontend Web Developer

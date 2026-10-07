@@ -23,9 +23,9 @@ html_machine_test/
 workflows/
  deploy.yml
 
-## Getting Started
 
-### 1. Clone the repo
+
+
 
 ```bash
 git clone https://github.com/Sreekumar-9677/html_machine_test.git
@@ -73,65 +73,4 @@ The GitHub Actions workflow triggers automatically:
 |---|---|
 | PR created to `main` | Docker image is built and tested |
 | PR merged to `main` | Docker image pushed to Docker Hub + deployed to EC2 |
-
-### Flow
-
-```
-staging branch
-    â†“ (create PR)
-main branch
-    â†“ (GitHub Actions triggers)
-Build Docker image
-    â†“
-Push to Docker Hub
-    â†“
-SSH into EC2
-    â†“
-Pull latest image â†’ Run container on port 80
-```
-
----
-
-
-
-| Secret | Description |
-|---|---|
-| `DOCKER_USERNAME` | Docker Hub username |
-| `DOCKER_PASSWORD` | Docker Hub password |
-| `EC2_HOST` | EC2 public IP address |
-| `EC2_USER` | EC2 SSH username (e.g. `ubuntu`) |
-| `EC2_SSH_KEY` | Contents of your `.pem` private key file |
-
-
-
-## EC2 Setup (First time only)
-
-SSH into your EC2 instance and install Docker:
-
-```bash
-ssh -i your-key.pem ubuntu@EC2_IP
-
-sudo apt update && sudo apt install -y docker.io
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker ubuntu
-```
-
----
-
-## Deploy Manually (if needed)
-
-```bash
-# Pull and run latest image on EC2
-docker pull yourdockerhubuser/html-signin-app:latest
-
-docker stop html-signin-app || true
-docker rm html-signin-app || true
-
-docker run -d \
-  --name html-signin-app \
-  --restart always \
-  -p 80:80 \
-  yourdockerhubuser/html-signin-app:latest
-```
 

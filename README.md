@@ -102,7 +102,7 @@ Pull latest image â†’ Run container on port 80
 | `EC2_USER` | EC2 SSH username (e.g. `ubuntu`) |
 | `EC2_SSH_KEY` | Contents of your `.pem` private key file |
 
----
+
 
 ## EC2 Setup (First time only)
 

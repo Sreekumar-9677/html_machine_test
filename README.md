@@ -1,4 +1,4 @@
-# HTML Machine Test
+# HTML Machine Test.
 
 A simple sign-in page built with HTML, CSS and JavaScript. Containerized with Docker and deployed to AWS EC2 using GitHub Actions CI/CD pipeline.
 
